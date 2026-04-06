@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
-import { BarChart3, DollarSign, Zap, Activity, Download, Plus, Check, ChevronDown, CalendarIcon, X } from 'lucide-react';
+import { BarChart3, DollarSign, Zap, Activity, Download, Plus, Check, ChevronDown, CalendarIcon, X, Trash2, Key, Shield, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   usageEvents, projectsAPI, filterEventsByPeriod, filterEventsByProjects,
   aggregateKPIs, aggregateByDay, aggregateByModel, aggregateByProject,
-  aggregateByUser, aggregateByEndpoint,
+  aggregateByUser, aggregateByEndpoint, apiKeys as mockApiKeys, currentUser,
 } from '@/data/mockData';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -13,6 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 type Period = 'today' | '7d' | 'month' | 'custom';
 type ActiveMetric = 'cost' | 'inputTokens' | 'outputTokens' | 'requests';
@@ -25,7 +26,11 @@ const formatCurrency = (v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumF
 const formatTokens = (v: number) => v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v.toString();
 const formatMetricValue = (v: number, metric: ActiveMetric) => metric === 'cost' ? formatCurrency(v) : formatTokens(v);
 
-export function AnalyticsDashboard() {
+interface AnalyticsDashboardProps {
+  onNavigate?: (view: string) => void;
+}
+
+export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [period, setPeriod] = useState<Period>('month');
   const [customRange, setCustomRange] = useState<{ from?: Date; to?: Date }>({});
@@ -34,12 +39,18 @@ export function AnalyticsDashboard() {
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
+  const [deletedProjects, setDeletedProjects] = useState<Set<string>>(new Set());
 
-  // Detailed analysis filters (independent)
+  // Detailed analysis filters
   const [detailedProjects, setDetailedProjects] = useState<string[]>([]);
   const [detailedUsers, setDetailedUsers] = useState<string[]>([]);
   const [detailedModels, setDetailedModels] = useState<string[]>([]);
   const [detailedEndpoints, setDetailedEndpoints] = useState<string[]>([]);
+  const [detailedPeriod, setDetailedPeriod] = useState<Period>('month');
+  const [detailedCustomRange, setDetailedCustomRange] = useState<{ from?: Date; to?: Date }>({});
+
+  // API Keys state
+  const [keys, setKeys] = useState(mockApiKeys);
 
   // Filter events by period + projects
   const filteredEvents = useMemo(() => {
@@ -55,21 +66,22 @@ export function AnalyticsDashboard() {
   const userData = useMemo(() => aggregateByUser(filteredEvents, activeMetric), [filteredEvents, activeMetric]);
   const endpointData = useMemo(() => aggregateByEndpoint(filteredEvents, activeMetric), [filteredEvents, activeMetric]);
 
-  // Detailed analysis: independent filtering with AND logic
+  // Detailed analysis: period + AND logic filters
   const detailedEvents = useMemo(() => {
-    return usageEvents.filter(e => {
+    let events = filterEventsByPeriod(usageEvents, detailedPeriod, detailedCustomRange.from && detailedCustomRange.to ? { from: detailedCustomRange.from, to: detailedCustomRange.to } : undefined);
+    return events.filter(e => {
       if (detailedProjects.length > 0 && !detailedProjects.includes(e.projectId)) return false;
       if (detailedUsers.length > 0 && !detailedUsers.includes(e.userId)) return false;
       if (detailedModels.length > 0 && !detailedModels.includes(e.model)) return false;
       if (detailedEndpoints.length > 0 && !detailedEndpoints.includes(e.endpoint)) return false;
       return true;
     });
-  }, [detailedProjects, detailedUsers, detailedModels, detailedEndpoints]);
+  }, [detailedPeriod, detailedCustomRange, detailedProjects, detailedUsers, detailedModels, detailedEndpoints]);
 
   const detailedChartData = useMemo(() => aggregateByDay(detailedEvents, 'cost'), [detailedEvents]);
 
   // Unique values for detailed filters
-  const allUsers = useMemo(() => {
+  const allUsersFilter = useMemo(() => {
     const map = new Map<string, string>();
     usageEvents.forEach(e => map.set(e.userId, e.userName));
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
@@ -80,6 +92,18 @@ export function AnalyticsDashboard() {
 
   const toggleProject = (id: string) => {
     setSelectedProjects(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
+  };
+
+  const handleDeleteProject = (projectName: string) => {
+    setDeletedProjects(prev => new Set([...prev, projectName]));
+  };
+
+  const handleRevokeKey = (keyId: string) => {
+    setKeys(prev => prev.map(k => k.id === keyId ? { ...k, status: 'revogada' as const } : k));
+  };
+
+  const handleRegenerateKey = (keyId: string) => {
+    setKeys(prev => prev.map(k => k.id === keyId ? { ...k, maskedKey: `sk-...${Math.random().toString(36).slice(-4)}`, status: 'ativa' as const } : k));
   };
 
   const periods = [
@@ -98,6 +122,8 @@ export function AnalyticsDashboard() {
   ];
 
   const tooltipStyle = { backgroundColor: 'hsl(220, 13%, 13%)', border: '1px solid hsl(220, 13%, 20%)', borderRadius: '8px', fontSize: '12px' };
+
+  const activeProjectData = projectData.filter(p => !deletedProjects.has(p.project));
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -143,7 +169,6 @@ export function AnalyticsDashboard() {
 
           {/* Filters row */}
           <div className="flex items-center gap-3 flex-wrap">
-            {/* Project multi-select */}
             <MultiSelectDropdown
               label="Projetos"
               items={projectsAPI.map(p => ({ id: p.id, name: p.name }))}
@@ -151,64 +176,7 @@ export function AnalyticsDashboard() {
               onToggle={toggleProject}
               onClear={() => setSelectedProjects([])}
             />
-
-            {/* Period buttons */}
-            <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
-              {periods.map(p => (
-                p.id === 'custom' ? (
-                  <Popover key={p.id}>
-                    <PopoverTrigger asChild>
-                      <button className={cn(
-                        'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
-                        period === 'custom' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
-                      )}>
-                        {period === 'custom' && customRange.from && customRange.to
-                          ? `${format(customRange.from, 'dd/MM')} — ${format(customRange.to, 'dd/MM')}`
-                          : 'Custom'}
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-4" align="end">
-                      <div className="flex flex-col gap-3">
-                        <p className="text-xs font-medium text-muted-foreground">Selecione o período</p>
-                        <div className="flex gap-4">
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Início</p>
-                            <Calendar
-                              mode="single"
-                              selected={customRange.from}
-                              onSelect={d => { setCustomRange(prev => ({ ...prev, from: d })); if (d && customRange.to) setPeriod('custom'); }}
-                              className="p-3 pointer-events-auto"
-                              locale={ptBR}
-                            />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Fim</p>
-                            <Calendar
-                              mode="single"
-                              selected={customRange.to}
-                              onSelect={d => { setCustomRange(prev => ({ ...prev, to: d })); if (customRange.from && d) setPeriod('custom'); }}
-                              className="p-3 pointer-events-auto"
-                              locale={ptBR}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                ) : (
-                  <button
-                    key={p.id}
-                    onClick={() => setPeriod(p.id)}
-                    className={cn(
-                      'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
-                      period === p.id ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
-                    )}
-                  >
-                    {p.label}
-                  </button>
-                )
-              ))}
-            </div>
+            <PeriodSelector periods={periods} current={period} onChange={setPeriod} customRange={customRange} setCustomRange={setCustomRange} />
           </div>
         </div>
 
@@ -293,7 +261,7 @@ export function AnalyticsDashboard() {
             <div className="bg-card rounded-xl border border-border p-6">
               <h3 className="text-sm font-medium mb-4">Comparativo entre Projetos — {METRIC_LABELS[activeMetric]}</h3>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={projectData}>
+                <BarChart data={activeProjectData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 20%)" />
                   <XAxis dataKey="project" tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} />
                   <YAxis tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} tickFormatter={v => activeMetric === 'cost' ? `R$${v}` : formatTokens(Number(v))} />
@@ -302,15 +270,38 @@ export function AnalyticsDashboard() {
                 </BarChart>
               </ResponsiveContainer>
               <div className="mt-6 space-y-2">
-                {projectData.map(p => (
+                {activeProjectData.map(p => (
                   <div key={p.project} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                     <div>
                       <p className="text-sm font-medium">{p.project}</p>
                       <p className="text-xs text-muted-foreground">{formatTokens(p.tokens)} tokens · {formatTokens(p.requests)} req</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">{formatMetricValue(p.value, activeMetric)}</p>
-                      <p className="text-xs text-muted-foreground">{p.percentage}%</p>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-sm font-medium">{formatMetricValue(p.value, activeMetric)}</p>
+                        <p className="text-xs text-muted-foreground">{p.percentage}%</p>
+                      </div>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                            <Trash2 size={14} />
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Deletar Projeto</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja deletar o projeto "{p.project}"? Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteProject(p.project)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Deletar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 ))}
@@ -400,6 +391,9 @@ export function AnalyticsDashboard() {
         <div className="mb-8">
           <h2 className="text-lg font-semibold mb-4">Análise Detalhada</h2>
           <div className="bg-card rounded-xl border border-border p-6">
+            <div className="flex flex-wrap gap-2 mb-4">
+              <PeriodSelector periods={periods} current={detailedPeriod} onChange={setDetailedPeriod} customRange={detailedCustomRange} setCustomRange={setDetailedCustomRange} />
+            </div>
             <div className="flex flex-wrap gap-2 mb-6">
               <MultiSelectDropdown
                 label="Projeto"
@@ -408,14 +402,16 @@ export function AnalyticsDashboard() {
                 onToggle={id => setDetailedProjects(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
                 onClear={() => setDetailedProjects([])}
                 compact
+                showAll
               />
               <MultiSelectDropdown
                 label="Usuário"
-                items={allUsers.map(u => ({ id: u.id, name: u.name }))}
+                items={allUsersFilter.map(u => ({ id: u.id, name: u.name }))}
                 selected={detailedUsers}
                 onToggle={id => setDetailedUsers(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
                 onClear={() => setDetailedUsers([])}
                 compact
+                showAll
               />
               <MultiSelectDropdown
                 label="Modelo"
@@ -424,6 +420,7 @@ export function AnalyticsDashboard() {
                 onToggle={id => setDetailedModels(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
                 onClear={() => setDetailedModels([])}
                 compact
+                showAll
               />
               <MultiSelectDropdown
                 label="Endpoint"
@@ -432,6 +429,7 @@ export function AnalyticsDashboard() {
                 onToggle={id => setDetailedEndpoints(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
                 onClear={() => setDetailedEndpoints([])}
                 compact
+                showAll
               />
             </div>
 
@@ -452,12 +450,160 @@ export function AnalyticsDashboard() {
             </ResponsiveContainer>
           </div>
         </div>
+
+        {/* ACCESS MANAGEMENT */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Shield size={18} /> Gestão de Acesso
+          </h2>
+          <div className="bg-card rounded-xl border border-border p-6">
+            <p className="text-sm text-muted-foreground mb-4">
+              Gerencie as permissões de acesso dos usuários aos Projetos de API na página de Organização.
+            </p>
+            <button
+              onClick={() => onNavigate?.('settings')}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              <Shield size={14} /> Ir para Organização
+            </button>
+          </div>
+        </div>
+
+        {/* API KEYS */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Key size={18} /> API Keys
+          </h2>
+          <div className="bg-card rounded-xl border border-border p-6">
+            <p className="text-sm text-muted-foreground mb-4">
+              Gerencie as API Keys dos usuários da organização. Apenas o próprio usuário pode ver sua chave completa.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-3 px-2 text-muted-foreground font-medium text-xs">Usuário</th>
+                    <th className="text-left py-3 px-2 text-muted-foreground font-medium text-xs">Projeto</th>
+                    <th className="text-left py-3 px-2 text-muted-foreground font-medium text-xs">Key</th>
+                    <th className="text-left py-3 px-2 text-muted-foreground font-medium text-xs">Status</th>
+                    <th className="text-left py-3 px-2 text-muted-foreground font-medium text-xs">Criada em</th>
+                    <th className="text-right py-3 px-2 text-muted-foreground font-medium text-xs">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {keys.map(k => (
+                    <tr key={k.id} className="border-b border-border/50 hover:bg-secondary/50 transition-colors">
+                      <td className="py-3 px-2 font-medium">{k.userName}</td>
+                      <td className="py-3 px-2 text-muted-foreground">{k.projectName}</td>
+                      <td className="py-3 px-2 font-mono text-xs">{k.maskedKey}</td>
+                      <td className="py-3 px-2">
+                        <span className={cn('text-xs px-2 py-0.5 rounded-full',
+                          k.status === 'ativa' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
+                        )}>{k.status}</span>
+                      </td>
+                      <td className="py-3 px-2 text-xs text-muted-foreground">{k.createdAt.toLocaleDateString('pt-BR')}</td>
+                      <td className="py-3 px-2 text-right">
+                        <div className="flex items-center gap-1 justify-end">
+                          {k.userId === currentUser.id && (
+                            <button
+                              onClick={() => handleRegenerateKey(k.id)}
+                              className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                              title="Regenerar"
+                            >
+                              <RefreshCw size={13} />
+                            </button>
+                          )}
+                          {k.status === 'ativa' && (
+                            <button
+                              onClick={() => handleRevokeKey(k.id)}
+                              className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                              title="Revogar"
+                            >
+                              <X size={13} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
 // ========== SUB-COMPONENTS ==========
+
+function PeriodSelector({ periods, current, onChange, customRange, setCustomRange }: {
+  periods: { id: Period; label: string }[];
+  current: Period;
+  onChange: (p: Period) => void;
+  customRange: { from?: Date; to?: Date };
+  setCustomRange: (r: { from?: Date; to?: Date }) => void;
+}) {
+  return (
+    <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
+      {periods.map(p => (
+        p.id === 'custom' ? (
+          <Popover key={p.id}>
+            <PopoverTrigger asChild>
+              <button className={cn(
+                'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
+                current === 'custom' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
+              )}>
+                {current === 'custom' && customRange.from && customRange.to
+                  ? `${format(customRange.from, 'dd/MM')} — ${format(customRange.to, 'dd/MM')}`
+                  : 'Custom'}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-4" align="end">
+              <div className="flex flex-col gap-3">
+                <p className="text-xs font-medium text-muted-foreground">Selecione o período</p>
+                <div className="flex gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Início</p>
+                    <Calendar
+                      mode="single"
+                      selected={customRange.from}
+                      onSelect={d => { setCustomRange({ ...customRange, from: d }); if (d && customRange.to) onChange('custom'); }}
+                      className="p-3 pointer-events-auto"
+                      locale={ptBR}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Fim</p>
+                    <Calendar
+                      mode="single"
+                      selected={customRange.to}
+                      onSelect={d => { setCustomRange({ ...customRange, to: d }); if (customRange.from && d) onChange('custom'); }}
+                      className="p-3 pointer-events-auto"
+                      locale={ptBR}
+                    />
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        ) : (
+          <button
+            key={p.id}
+            onClick={() => onChange(p.id)}
+            className={cn(
+              'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
+              current === p.id ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
+            )}
+          >
+            {p.label}
+          </button>
+        )
+      ))}
+    </div>
+  );
+}
 
 function KPICard({ icon: Icon, label, value, color, active, onClick }: {
   icon: any; label: string; value: string; color: string; active: boolean; onClick: () => void;
@@ -486,13 +632,14 @@ function KPICard({ icon: Icon, label, value, color, active, onClick }: {
   );
 }
 
-function MultiSelectDropdown({ label, items, selected, onToggle, onClear, compact }: {
+function MultiSelectDropdown({ label, items, selected, onToggle, onClear, compact, showAll }: {
   label: string;
   items: { id: string; name: string }[];
   selected: string[];
   onToggle: (id: string) => void;
   onClear: () => void;
   compact?: boolean;
+  showAll?: boolean;
 }) {
   return (
     <Popover>
@@ -509,7 +656,19 @@ function MultiSelectDropdown({ label, items, selected, onToggle, onClear, compac
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-56 p-2" align="start">
-        {selected.length > 0 && (
+        {showAll && (
+          <button
+            onClick={onClear}
+            className={cn(
+              'w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-secondary transition-colors text-left mb-0.5',
+              selected.length === 0 && 'bg-secondary font-medium'
+            )}
+          >
+            <Check size={12} className={selected.length === 0 ? 'text-primary' : 'text-transparent'} />
+            <span>Todos</span>
+          </button>
+        )}
+        {!showAll && selected.length > 0 && (
           <button onClick={onClear} className="w-full text-left px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground flex items-center gap-1.5 mb-1">
             <X size={12} /> Limpar seleção
           </button>

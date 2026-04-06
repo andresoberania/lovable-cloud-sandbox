@@ -1,4 +1,4 @@
-import type { User, Organization, Group, Chat, ChatMessage, Assistant, Artifact, ProjectFile, ProjectChat, ProjectAPI, UsageEvent, Endpoint } from './types';
+import type { User, Organization, Group, Chat, ChatMessage, Assistant, Artifact, ProjectFile, ProjectChat, ProjectAPI, UsageEvent, Endpoint, APIKey, GroupMember, ProjectAPIMember } from './types';
 
 export const currentUser: User = {
   id: 'u1',
@@ -6,6 +6,15 @@ export const currentUser: User = {
   email: 'andre@empresa.com',
   role: 'admin',
 };
+
+export const allUsers: User[] = [
+  { id: 'u1', name: 'André Silva', email: 'andre@empresa.com', role: 'admin' },
+  { id: 'u2', name: 'Carlos Mendes', email: 'carlos@empresa.com', role: 'coordenador' },
+  { id: 'u3', name: 'Ana Costa', email: 'ana@empresa.com', role: 'coordenador' },
+  { id: 'u4', name: 'Rafael Santos', email: 'rafael@empresa.com', role: 'membro' },
+  { id: 'u5', name: 'Juliana Pereira', email: 'juliana@empresa.com', role: 'membro' },
+  { id: 'u6', name: 'Pedro Almeida', email: 'pedro@empresa.com', role: 'membro' },
+];
 
 export const organization: Organization = {
   id: 'org1',
@@ -24,6 +33,62 @@ export const groups: Group[] = [
   { id: 'g4', name: 'Produto', description: 'Gestão de produto', orgId: 'org1', memberCount: 7, coordinators: ['Mariana Souza'], projectsLinked: 3 },
 ];
 
+export const groupMembers: Record<string, GroupMember[]> = {
+  'g1': [
+    { userId: 'u1', role: 'admin' },
+    { userId: 'u2', role: 'coordenador' },
+    { userId: 'u4', role: 'membro' },
+    { userId: 'u6', role: 'membro' },
+  ],
+  'g2': [
+    { userId: 'u3', role: 'coordenador' },
+    { userId: 'u5', role: 'membro' },
+    { userId: 'u6', role: 'membro' },
+  ],
+  'g3': [
+    { userId: 'u1', role: 'admin' },
+    { userId: 'u4', role: 'membro' },
+    { userId: 'u5', role: 'membro' },
+  ],
+  'g4': [
+    { userId: 'u2', role: 'coordenador' },
+    { userId: 'u3', role: 'membro' },
+    { userId: 'u4', role: 'membro' },
+    { userId: 'u6', role: 'membro' },
+  ],
+};
+
+export const projectAPIMembers: Record<string, ProjectAPIMember[]> = {
+  'api1': [
+    { userId: 'u1', role: 'admin' },
+    { userId: 'u2', role: 'coordenador' },
+    { userId: 'u4', role: 'membro' },
+    { userId: 'u5', role: 'membro' },
+    { userId: 'u6', role: 'membro' },
+  ],
+  'api2': [
+    { userId: 'u1', role: 'admin' },
+    { userId: 'u2', role: 'coordenador' },
+    { userId: 'u3', role: 'membro' },
+  ],
+  'api3': [
+    { userId: 'u3', role: 'coordenador' },
+    { userId: 'u5', role: 'membro' },
+    { userId: 'u6', role: 'membro' },
+  ],
+};
+
+export const apiKeys: APIKey[] = [
+  { id: 'key1', maskedKey: 'sk-...a3f2', userId: 'u1', userName: 'André Silva', projectId: 'api1', projectName: 'Produção — Chat API', status: 'ativa', createdAt: new Date(2026, 0, 15) },
+  { id: 'key2', maskedKey: 'sk-...b7d4', userId: 'u2', userName: 'Carlos Mendes', projectId: 'api1', projectName: 'Produção — Chat API', status: 'ativa', createdAt: new Date(2026, 0, 20) },
+  { id: 'key3', maskedKey: 'sk-...c1e8', userId: 'u4', userName: 'Rafael Santos', projectId: 'api1', projectName: 'Produção — Chat API', status: 'ativa', createdAt: new Date(2026, 1, 5) },
+  { id: 'key4', maskedKey: 'sk-...d9a1', userId: 'u1', userName: 'André Silva', projectId: 'api2', projectName: 'Staging — Testes', status: 'ativa', createdAt: new Date(2026, 1, 10) },
+  { id: 'key5', maskedKey: 'sk-...e5c3', userId: 'u3', userName: 'Ana Costa', projectId: 'api3', projectName: 'Marketing Bot', status: 'ativa', createdAt: new Date(2026, 2, 5) },
+  { id: 'key6', maskedKey: 'sk-...f2b7', userId: 'u5', userName: 'Juliana Pereira', projectId: 'api1', projectName: 'Produção — Chat API', status: 'revogada', createdAt: new Date(2026, 0, 25) },
+  { id: 'key7', maskedKey: 'sk-...g8d6', userId: 'u6', userName: 'Pedro Almeida', projectId: 'api2', projectName: 'Staging — Testes', status: 'ativa', createdAt: new Date(2026, 2, 15) },
+  { id: 'key8', maskedKey: 'sk-...h4f9', userId: 'u2', userName: 'Carlos Mendes', projectId: 'api3', projectName: 'Marketing Bot', status: 'ativa', createdAt: new Date(2026, 2, 20) },
+];
+
 const makeMessages = (pairs: [string, string][]): ChatMessage[] => {
   const msgs: ChatMessage[] = [];
   let i = 0;
@@ -37,7 +102,7 @@ const makeMessages = (pairs: [string, string][]): ChatMessage[] => {
 export const chats: Chat[] = [
   {
     id: 'c1', title: 'Análise de Contratos Q1', projectId: 'p3', isPrivate: false, createdBy: 'u1',
-    createdAt: new Date(2026, 3, 1), updatedAt: new Date(2026, 3, 3),
+    createdAt: new Date(2026, 3, 1), updatedAt: new Date(2026, 3, 3), visibility: 'shared',
     messages: makeMessages([
       ['Analise as cláusulas de rescisão do contrato anexo.', 'Com base no contrato fornecido, identifiquei 3 cláusulas de rescisão principais:\n\n**Cláusula 8.1** — Rescisão sem justa causa com aviso prévio de 30 dias e multa de 10%.\n\n**Cláusula 8.2** — Rescisão por justa causa em caso de descumprimento, sem multa.\n\n**Cláusula 8.3** — Rescisão por força maior, com suspensão de obrigações por até 90 dias.\n\nRecomendo revisar a Cláusula 8.1, pois a multa de 10% está abaixo do padrão de mercado (15-20%).'],
       ['Quais artigos do Código Civil se aplicam?', 'Os artigos relevantes do Código Civil brasileiro são:\n\n- **Art. 473** — Resilição unilateral\n- **Art. 474** — Cláusula resolutiva expressa\n- **Art. 475** — Resolução por inadimplemento\n- **Art. 393** — Caso fortuito e força maior'],
@@ -45,30 +110,37 @@ export const chats: Chat[] = [
   },
   {
     id: 'c2', title: 'Estratégia de Conteúdo Maio', projectId: 'p2', isPrivate: false, createdBy: 'u1',
-    createdAt: new Date(2026, 3, 2), updatedAt: new Date(2026, 3, 4),
+    createdAt: new Date(2026, 3, 2), updatedAt: new Date(2026, 3, 4), visibility: 'shared',
     messages: makeMessages([
       ['Crie um calendário editorial para maio focado em IA generativa.', '## Calendário Editorial — Maio 2026\n\n**Semana 1**: Blog + LinkedIn\n**Semana 2**: Case Study + Webinar\n**Semana 3**: Prompt Engineering\n**Semana 4**: Compilação'],
     ]),
   },
   {
     id: 'c3', title: 'Refatoração Microserviços', projectId: 'p1', isPrivate: false, createdBy: 'u1',
-    createdAt: new Date(2026, 2, 28), updatedAt: new Date(2026, 3, 5),
+    createdAt: new Date(2026, 2, 28), updatedAt: new Date(2026, 3, 5), visibility: 'shared',
     messages: makeMessages([
       ['Sugira uma arquitetura para migrar nosso monolito para microserviços.', '## Proposta\n\n### Fase 1 — Strangler Fig\n1. Auth Service\n2. User Service\n3. Billing Service\n\n### Fase 2 — Core\n4. Chat Service\n5. AI Gateway\n6. Analytics Service'],
     ]),
   },
   {
     id: 'c4', title: 'Brainstorm produto v3', projectId: undefined, isPrivate: false, createdBy: 'u1',
-    createdAt: new Date(2026, 3, 4), updatedAt: new Date(2026, 3, 5),
+    createdAt: new Date(2026, 3, 4), updatedAt: new Date(2026, 3, 5), visibility: 'shared',
     messages: makeMessages([
       ['Quais features devemos priorizar para a v3?', '🔥 Alta: Multimodal, Workflows, RAG avançado\n⚡ Média: Templates, Integrações\n📊 Backlog: API analytics, Previsão de custos'],
     ]),
   },
   {
     id: 'c5', title: 'Rascunho NDA', projectId: 'p3', isPrivate: true, createdBy: 'u1',
-    createdAt: new Date(2026, 3, 5), updatedAt: new Date(2026, 3, 5),
+    createdAt: new Date(2026, 3, 5), updatedAt: new Date(2026, 3, 5), visibility: 'private',
     messages: makeMessages([
       ['Me ajude a rascunhar um NDA bilateral.', '**ACORDO DE CONFIDENCIALIDADE BILATERAL**\n\n1. Definição de Informação Confidencial\n2. Obrigações\n3. Prazo: 2 anos\n4. Exceções'],
+    ]),
+  },
+  {
+    id: 'c6', title: 'Análise de performance do time', projectId: 'p1', isPrivate: true, createdBy: 'u1',
+    createdAt: new Date(2026, 3, 4), updatedAt: new Date(2026, 3, 5), visibility: 'private',
+    messages: makeMessages([
+      ['Analise a performance do time de engenharia no Q1.', 'Com base nos dados disponíveis, o time de engenharia teve:\n\n- **Velocity média**: 45 pontos/sprint\n- **Bug rate**: 3.2% (abaixo da média de 5%)\n- **Code coverage**: 82%\n\nÁreas de melhoria: documentação e testes de integração.'],
     ]),
   },
 ];
@@ -134,7 +206,7 @@ function seededRandom(seed: number) {
 function generateUsageEvents(): UsageEvent[] {
   const events: UsageEvent[] = [];
   let id = 0;
-  const baseDate = new Date(2026, 3, 6); // April 6, 2026
+  const baseDate = new Date(2026, 3, 6);
 
   for (let dayOffset = 0; dayOffset < 45; dayOffset++) {
     const day = new Date(baseDate);
@@ -185,7 +257,7 @@ export const usageEvents: UsageEvent[] = generateUsageEvents();
 // ========== AGGREGATION UTILITIES ==========
 
 export function filterEventsByPeriod(events: UsageEvent[], period: 'today' | '7d' | 'month' | 'custom', customRange?: { from: Date; to: Date }): UsageEvent[] {
-  const now = new Date(2026, 3, 6); // Fixed "now" for mock data
+  const now = new Date(2026, 3, 6);
   let start: Date;
   let end = new Date(now);
   end.setHours(23, 59, 59, 999);
@@ -336,7 +408,6 @@ export function aggregateByEndpoint(events: UsageEvent[], metric: 'cost' | 'inpu
   }));
 }
 
-// Keep backward compat for analyticsData (used nowhere else now but just in case)
 export const analyticsData = {
   totalCost: 12450.80,
   totalInputTokens: 45200000,
