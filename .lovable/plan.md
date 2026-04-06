@@ -1,65 +1,39 @@
 
 
-## Plano: Melhorias em Organização, Projetos Chat, Detalhes do Projeto e Analytics
+## Plano: Cargo no Novo Grupo, Editar Grupo, Confirmação API Keys e Redesign Visual
 
-### 1. Página Organização (`src/components/SettingsView.tsx`)
+### 1. Página Organização — Novo Grupo com Cargo (`src/components/SettingsView.tsx`)
 
-**StatCards clicáveis:**
-- "Grupos" → scroll até a seção de Grupos (`scrollIntoView`)
-- "Custo Mensal" → navegar para Analytics (`onNavigate('analytics')`)
-- Receber prop `onNavigate` do `Index.tsx`
+No dialog de "+ Novo Grupo", ao selecionar um membro na lista, mostrar um dropdown/select ao lado do nome para escolher o cargo (Admin, Coordenador, Membro). O estado `newGroupMembers` passa de `string[]` para `{ userId: string; role: UserRole }[]`. Ao criar o grupo, os cargos são usados no `memberRoles`.
 
-**Botão "+ Novo Grupo":**
-- Acima da lista de grupos, botão que abre Dialog
-- Campos: Nome, Descrição, multi-select de membros com campo de busca (filtrar `allUsers` por nome)
-- Ao criar, adiciona grupo ao estado local
+### 2. Página Organização — Botão Editar Grupo (`src/components/SettingsView.tsx`)
 
-### 2. Página Projetos Chat (`src/components/ProjectsListView.tsx`)
+Adicionar um botão "Editar" (ícone Pencil) no header de cada grupo expandível, ao lado do nome. Ao clicar, abre um Dialog com os campos Nome e Descrição pré-preenchidos. Ao salvar, atualiza o estado `groups`.
 
-**Ações por projeto (tornar privado, compartilhar, arquivar):**
-- Adicionar dropdown/menu de 3 pontos em cada `ProjectCard` com opções: Tornar Privado, Compartilhar, Arquivar
-- Estado local `projectsState` para permitir mutação dos projetos
-- Funciona em todas as abas (Todos, Privados, Compartilhados, Arquivados)
+### 3. API Keys — Confirmação antes de Revogar/Regenerar (`src/components/AnalyticsDashboard.tsx`)
 
-**Popup "+ Novo Projeto":**
-- Dialog com: Nome, Descrição, Contexto de Sistema, toggle Privado/Compartilhado
-- Se compartilhado → multi-select de grupos da organização
-- Ao criar, adiciona ao estado local
+Envolver os botões de "Revogar" e "Regenerar" em `AlertDialog` com mensagem de confirmação antes de executar a ação. Ex: "Tem certeza que deseja revogar esta API Key?" / "Tem certeza que deseja regenerar sua API Key?"
 
-### 3. Detalhes do Projeto Chat (`src/components/ProjectDetailView.tsx`)
+### 4. Redesign Visual — Estilo inspirado na referência (`src/index.css`)
 
-**Aba Chats:**
-- Adicionar toggle Privado/Compartilhado no campo de chat inline (define visibilidade do chat que está sendo criado)
-- Botão "+ Novo Chat" → AlertDialog confirmando que o chat atual será finalizado; ao confirmar, salva chat atual na lista e limpa o campo
-- Separar lista de chats em duas seções: "Chats Privados" e "Chats Compartilhados"
-- Botão para converter chat privado → compartilhado (e vice-versa)
-- Botões Mover e Deletar → AlertDialog de confirmação antes da ação
+A imagem mostra um layout escuro estilo ChatGPT/Claude com:
+- Fundo mais escuro e quente (tons de cinza-escuro com leve tom quente)
+- Sidebar quase preta com itens de cor neutra
+- Cards e inputs com bordas sutis
+- Texto principal claro, secundário em cinza médio
+- Input de chat com fundo ligeiramente mais claro que o background
+- Badge/tags com cores suaves
 
-**Aba Configurações:**
-- Na seção "Grupos com Acesso", adicionar multi-select para adicionar/remover grupos (lista de todos os grupos com checkboxes)
-
-**Aba Arquivos:**
-- Botão Upload funcional: abre `<input type="file" multiple>` escondido, aceita todos os tipos
-- Ao selecionar arquivos, adiciona-os ao estado local `uploadedFiles` e mostra na lista
-
-**Aba Artefatos:**
-- Adicionar texto explicativo: "Artefatos são documentos gerados pela conversa com a IA neste projeto."
-- Adicionar botão Download em cada artefato (simula download com `Blob` + `URL.createObjectURL`)
-
-### 4. Analytics API (`src/components/AnalyticsDashboard.tsx`)
-
-**Popup "+ Novo Projeto API":**
-- Adicionar campo multi-select com busca para escolher membros da organização que terão acesso ao projeto
-
-### 5. Navegação (`src/pages/Index.tsx`)
-
-- Passar `onNavigate` para `SettingsView` para permitir navegação ao Analytics
-- Passar `onNavigate` para `ProjectsListView` se necessário
+Ajustes nas CSS variables em `src/index.css`:
+- `--background`: tom mais escuro (~`220 14% 8%`)
+- `--card`: tom ligeiramente mais claro (`220 14% 11%`)
+- `--sidebar-background`: quase preto (`220 14% 6%`)
+- `--border`: mais sutil (`220 13% 15%`)
+- `--chat-input`: input mais destacado (`220 13% 12%`)
+- Revisar fontes e espaçamentos para ficarem mais limpos
 
 ### Arquivos modificados
-- `src/components/SettingsView.tsx` — StatCards clicáveis, botão Novo Grupo com Dialog
-- `src/components/ProjectsListView.tsx` — ações por projeto, popup Novo Projeto completo
-- `src/components/ProjectDetailView.tsx` — toggle visibilidade no chat, confirmações, seções separadas, upload funcional, download artefatos, grupos editáveis
-- `src/components/AnalyticsDashboard.tsx` — multi-select de membros no Novo Projeto API
-- `src/pages/Index.tsx` — passar props de navegação
+- `src/components/SettingsView.tsx` — cargo no novo grupo + botão editar grupo
+- `src/components/AnalyticsDashboard.tsx` — AlertDialog em revogar/regenerar API Keys
+- `src/index.css` — ajuste de palette de cores para estilo mais escuro/elegante
 
