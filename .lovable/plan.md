@@ -1,77 +1,65 @@
 
 
-## Plano: Melhorias em Organização, Analytics e Projetos Chat
+## Plano: Melhorias em Organização, Projetos Chat, Detalhes do Projeto e Analytics
 
-### Resumo
-Renomear "Configurações" para "Organização" com gestão de membros interativa, adicionar seções de API Keys e Gestão de Acesso no Analytics, filtro de data custom na Análise Detalhada, opção "Todos" nos filtros, botão deletar projeto, e reformular a aba Chats do projeto com chat inline, tipos privado/compartilhado e ações por chat.
+### 1. Página Organização (`src/components/SettingsView.tsx`)
 
----
+**StatCards clicáveis:**
+- "Grupos" → scroll até a seção de Grupos (`scrollIntoView`)
+- "Custo Mensal" → navegar para Analytics (`onNavigate('analytics')`)
+- Receber prop `onNavigate` do `Index.tsx`
 
-### 1. Dados Mockados (`src/data/mockData.ts` + `src/data/types.ts`)
+**Botão "+ Novo Grupo":**
+- Acima da lista de grupos, botão que abre Dialog
+- Campos: Nome, Descrição, multi-select de membros com campo de busca (filtrar `allUsers` por nome)
+- Ao criar, adiciona grupo ao estado local
 
-- Criar array `allUsers: User[]` com 6 usuários (já existem em USERS_DATA mas não como `User[]`)
-- Criar mapa `groupMembers: Record<string, {userId, role}[]>` associando usuários a grupos
-- Criar mapa `projectAPIMembers: Record<string, {userId, role}[]>` associando usuários a projetos API
-- Criar tipo `APIKey` mockado: `{ id, maskedKey, userId, projectId, status, createdAt }`
-- Gerar array `apiKeys: APIKey[]` com ~8 keys mockadas
+### 2. Página Projetos Chat (`src/components/ProjectsListView.tsx`)
 
-### 2. Página Organização (`src/components/SettingsView.tsx`)
+**Ações por projeto (tornar privado, compartilhar, arquivar):**
+- Adicionar dropdown/menu de 3 pontos em cada `ProjectCard` com opções: Tornar Privado, Compartilhar, Arquivar
+- Estado local `projectsState` para permitir mutação dos projetos
+- Funciona em todas as abas (Todos, Privados, Compartilhados, Arquivados)
 
-**Renomear**: "Configurações" → "Organização" (título + sidebar + header do Index)
+**Popup "+ Novo Projeto":**
+- Dialog com: Nome, Descrição, Contexto de Sistema, toggle Privado/Compartilhado
+- Se compartilhado → multi-select de grupos da organização
+- Ao criar, adiciona ao estado local
 
-**Grupos expandíveis**: Cada grupo vira um accordion/collapsible. Ao clicar, mostra lista de membros com:
-- Nome, cargo (badge Admin/Coordenador/Membro)
-- Botão de ações (dropdown) por membro com:
-  - "Mudar cargo" → sub-menu com os 3 cargos
-  - "Atribuir grupo" → multi-select com checkboxes dos grupos (toggle)
-  - "Projetos de Chat" → lista dos projetos de chat que pertence
+### 3. Detalhes do Projeto Chat (`src/components/ProjectDetailView.tsx`)
 
-**Projetos API expandíveis**: Ao clicar, mostra membros com:
-- Nome, cargo
-- Botão "Atribuir Projeto de API" → multi-select com projetos API (adicionar/remover)
+**Aba Chats:**
+- Adicionar toggle Privado/Compartilhado no campo de chat inline (define visibilidade do chat que está sendo criado)
+- Botão "+ Novo Chat" → AlertDialog confirmando que o chat atual será finalizado; ao confirmar, salva chat atual na lista e limpa o campo
+- Separar lista de chats em duas seções: "Chats Privados" e "Chats Compartilhados"
+- Botão para converter chat privado → compartilhado (e vice-versa)
+- Botões Mover e Deletar → AlertDialog de confirmação antes da ação
 
-### 3. Analytics (`src/components/AnalyticsDashboard.tsx`)
+**Aba Configurações:**
+- Na seção "Grupos com Acesso", adicionar multi-select para adicionar/remover grupos (lista de todos os grupos com checkboxes)
 
-**Visão Geral — Botão Deletar Projeto**: Na aba "Por Projeto", adicionar botão de deletar (ícone Trash2) ao lado de cada projeto no detalhamento, com dialog de confirmação.
+**Aba Arquivos:**
+- Botão Upload funcional: abre `<input type="file" multiple>` escondido, aceita todos os tipos
+- Ao selecionar arquivos, adiciona-os ao estado local `uploadedFiles` e mostra na lista
 
-**Análise Detalhada — Filtro de Data Custom**: Adicionar os mesmos botões de período (Hoje/7d/Mês/Custom) na seção de Análise Detalhada, com estado independente `detailedPeriod` e `detailedCustomRange`. Os eventos da análise detalhada passam por este filtro de data antes dos filtros de projeto/usuário/modelo/endpoint.
+**Aba Artefatos:**
+- Adicionar texto explicativo: "Artefatos são documentos gerados pela conversa com a IA neste projeto."
+- Adicionar botão Download em cada artefato (simula download com `Blob` + `URL.createObjectURL`)
 
-**Opção "Todos" nos filtros**: Em cada `MultiSelectDropdown`, adicionar item "Todos" no topo da lista que limpa a seleção (equivalente a "sem filtro").
+### 4. Analytics API (`src/components/AnalyticsDashboard.tsx`)
 
-**Seção Gestão de Acesso**: Botão/link que navega para a página Organização (seção Projetos API). Receber `onNavigate` como prop.
+**Popup "+ Novo Projeto API":**
+- Adicionar campo multi-select com busca para escolher membros da organização que terão acesso ao projeto
 
-**Seção API Keys**: Nova seção no final do Analytics com:
-- Tabela listando todas as API keys da org: usuário, projeto, status (ativa/revogada), data de criação, key mascarada
-- Admin pode revogar qualquer key (botão)
-- Usuário atual pode regenerar sua própria key (botão)
-- Ninguém vê a key completa de outro usuário
+### 5. Navegação (`src/pages/Index.tsx`)
 
-### 4. Projetos Chat — Aba Chats (`src/components/ProjectDetailView.tsx`)
-
-**Chat inline**: Campo de input no topo da aba para conversar diretamente (reutilizar lógica do ChatView). Mostra as últimas mensagens inline.
-
-**Tipos de chat**: Cada chat tem badge visual:
-- "Privado" (Lock icon) — só o criador vê
-- "Compartilhado" (Users icon) — todos com acesso ao projeto veem
-
-**Ações por chat** (botões visíveis em cada card):
-- Continuar/Editar (abre o chat)
-- Remover (dialog de confirmação)
-- Mover para fora do projeto (remove vínculo)
-- Mover para outro projeto (dropdown com lista de projetos)
-
-### 5. Navegação (`src/pages/Index.tsx` + `src/components/AppSidebar.tsx`)
-
-- Renomear label "Configurações" → "Organização" na sidebar
-- Renomear no header "Configurações" → "Organização"
-- Passar `onNavigate` para `AnalyticsDashboard` para permitir link para página Organização
+- Passar `onNavigate` para `SettingsView` para permitir navegação ao Analytics
+- Passar `onNavigate` para `ProjectsListView` se necessário
 
 ### Arquivos modificados
-- `src/data/types.ts` — novos tipos
-- `src/data/mockData.ts` — novos dados mockados (membros, API keys)
-- `src/components/SettingsView.tsx` — reescrever com accordions e ações
-- `src/components/AnalyticsDashboard.tsx` — deletar projeto, filtro data na análise detalhada, "Todos", seções Gestão de Acesso e API Keys
-- `src/components/ProjectDetailView.tsx` — reformular aba Chats
-- `src/pages/Index.tsx` — renomear, passar props
-- `src/components/AppSidebar.tsx` — renomear label
+- `src/components/SettingsView.tsx` — StatCards clicáveis, botão Novo Grupo com Dialog
+- `src/components/ProjectsListView.tsx` — ações por projeto, popup Novo Projeto completo
+- `src/components/ProjectDetailView.tsx` — toggle visibilidade no chat, confirmações, seções separadas, upload funcional, download artefatos, grupos editáveis
+- `src/components/AnalyticsDashboard.tsx` — multi-select de membros no Novo Projeto API
+- `src/pages/Index.tsx` — passar props de navegação
 
