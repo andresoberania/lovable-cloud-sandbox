@@ -540,22 +540,52 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
                       <td className="py-3 px-2 text-right">
                         <div className="flex items-center gap-1 justify-end">
                           {k.userId === currentUser.id && (
-                            <button
-                              onClick={() => handleRegenerateKey(k.id)}
-                              className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                              title="Regenerar"
-                            >
-                              <RefreshCw size={13} />
-                            </button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <button
+                                  className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                                  title="Regenerar"
+                                >
+                                  <RefreshCw size={13} />
+                                </button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Regenerar API Key</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja regenerar sua API Key? A chave atual será invalidada e uma nova será gerada.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleRegenerateKey(k.id)}>Regenerar</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           )}
                           {k.status === 'ativa' && (
-                            <button
-                              onClick={() => handleRevokeKey(k.id)}
-                              className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                              title="Revogar"
-                            >
-                              <X size={13} />
-                            </button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <button
+                                  className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                  title="Revogar"
+                                >
+                                  <X size={13} />
+                                </button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Revogar API Key</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja revogar esta API Key? Esta ação não pode ser desfeita e a chave deixará de funcionar imediatamente.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleRevokeKey(k.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Revogar</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           )}
                         </div>
                       </td>

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Building2, Users, FolderOpen, Shield, ChevronDown, ChevronRight, MoreHorizontal, Check, Plus, Search } from 'lucide-react';
+import { Building2, Users, FolderOpen, Shield, ChevronDown, ChevronRight, MoreHorizontal, Check, Plus, Search, Pencil } from 'lucide-react';
 import { organization, groups as initialGroups, currentUser, projectsAPI, allUsers, groupMembers, projectAPIMembers, projectsChat } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -53,8 +53,14 @@ export function SettingsView({ onNavigate }: SettingsViewProps) {
   const [newGroupOpen, setNewGroupOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupDesc, setNewGroupDesc] = useState('');
-  const [newGroupMembers, setNewGroupMembers] = useState<string[]>([]);
+  const [newGroupMembers, setNewGroupMembers] = useState<{ userId: string; role: UserRole }[]>([]);
   const [newGroupSearch, setNewGroupSearch] = useState('');
+
+  // Edit Group Dialog
+  const [editGroupOpen, setEditGroupOpen] = useState(false);
+  const [editGroupId, setEditGroupId] = useState<string | null>(null);
+  const [editGroupName, setEditGroupName] = useState('');
+  const [editGroupDesc, setEditGroupDesc] = useState('');
 
   const toggleGroup = (id: string) => {
     setExpandedGroups(prev => {
@@ -106,15 +112,13 @@ export function SettingsView({ onNavigate }: SettingsViewProps) {
       projectsLinked: 0,
     };
     setGroups(prev => [...prev, newGroup]);
-    // Initialize member roles for this group
     const newRoles: Record<string, UserRole> = {};
-    newGroupMembers.forEach(uid => { newRoles[uid] = 'membro'; });
+    newGroupMembers.forEach(m => { newRoles[m.userId] = m.role; });
     setMemberRoles(prev => ({ ...prev, [newGroup.id]: newRoles }));
-    // Update member group assignments
     setMemberGroupAssignments(prev => {
       const updated = { ...prev };
-      newGroupMembers.forEach(uid => {
-        updated[uid] = [...(updated[uid] || []), newGroup.id];
+      newGroupMembers.forEach(m => {
+        updated[m.userId] = [...(updated[m.userId] || []), newGroup.id];
       });
       return updated;
     });
@@ -123,6 +127,21 @@ export function SettingsView({ onNavigate }: SettingsViewProps) {
     setNewGroupMembers([]);
     setNewGroupSearch('');
     setNewGroupOpen(false);
+  };
+
+  const handleEditGroup = () => {
+    if (!editGroupId || !editGroupName.trim()) return;
+    setGroups(prev => prev.map(g => g.id === editGroupId ? { ...g, name: editGroupName.trim(), description: editGroupDesc.trim() || undefined } : g));
+    setEditGroupOpen(false);
+    setEditGroupId(null);
+  };
+
+  const openEditGroup = (g: Group, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditGroupId(g.id);
+    setEditGroupName(g.name);
+    setEditGroupDesc(g.description || '');
+    setEditGroupOpen(true);
   };
 
   const filteredNewGroupUsers = allUsers.filter(u =>
@@ -205,6 +224,13 @@ export function SettingsView({ onNavigate }: SettingsViewProps) {
                         <p className="text-sm font-medium">{g.name}</p>
                         <p className="text-xs text-muted-foreground">{g.description}</p>
                       </div>
+                      <button
+                        onClick={(e) => openEditGroup(g, e)}
+                        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors ml-1"
+                        title="Editar grupo"
+                      >
+                        <Pencil size={14} />
+                      </button>
                     </div>
                     <div className="text-right">
                       <p className="text-sm">{allMemberIds.length} membros</p>
@@ -375,23 +401,40 @@ export function SettingsView({ onNavigate }: SettingsViewProps) {
                   placeholder="Buscar membro..."
                 />
               </div>
-              <div className="max-h-40 overflow-y-auto space-y-1 border border-border rounded-lg p-2">
-                {filteredNewGroupUsers.map(u => (
-                  <button
-                    key={u.id}
-                    onClick={() => setNewGroupMembers(prev => prev.includes(u.id) ? prev.filter(id => id !== u.id) : [...prev, u.id])}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-secondary transition-colors"
-                  >
-                    <Checkbox checked={newGroupMembers.includes(u.id)} className="pointer-events-none" />
-                    <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-medium text-primary">
-                      {u.name.split(' ').map(n => n[0]).join('')}
+              <div className="max-h-48 overflow-y-auto space-y-1 border border-border rounded-lg p-2">
+                {filteredNewGroupUsers.map(u => {
+                  const isSelected = newGroupMembers.some(m => m.userId === u.id);
+                  const memberEntry = newGroupMembers.find(m => m.userId === u.id);
+                  return (
+                    <div key={u.id} className="flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-secondary transition-colors">
+                      <button
+                        onClick={() => setNewGroupMembers(prev => isSelected ? prev.filter(m => m.userId !== u.id) : [...prev, { userId: u.id, role: 'membro' as UserRole }])}
+                        className="flex items-center gap-2 flex-1 min-w-0"
+                      >
+                        <Checkbox checked={isSelected} className="pointer-events-none" />
+                        <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-medium text-primary shrink-0">
+                          {u.name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <div className="text-left truncate">
+                          <span className="block">{u.name}</span>
+                          <span className="text-muted-foreground">{u.email}</span>
+                        </div>
+                      </button>
+                      {isSelected && (
+                        <select
+                          value={memberEntry?.role || 'membro'}
+                          onChange={(e) => setNewGroupMembers(prev => prev.map(m => m.userId === u.id ? { ...m, role: e.target.value as UserRole } : m))}
+                          className="bg-secondary border border-border rounded px-1.5 py-1 text-[10px] outline-none focus:border-primary shrink-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <option value="admin">Admin</option>
+                          <option value="coordenador">Coordenador</option>
+                          <option value="membro">Membro</option>
+                        </select>
+                      )}
                     </div>
-                    <div className="text-left">
-                      <span className="block">{u.name}</span>
-                      <span className="text-muted-foreground">{u.email}</span>
-                    </div>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
               {newGroupMembers.length > 0 && (
                 <p className="text-xs text-muted-foreground mt-1">{newGroupMembers.length} membro(s) selecionado(s)</p>
@@ -403,6 +446,41 @@ export function SettingsView({ onNavigate }: SettingsViewProps) {
               className="w-full py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:pointer-events-none"
             >
               Criar Grupo
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Group Dialog */}
+      <Dialog open={editGroupOpen} onOpenChange={setEditGroupOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Grupo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <label className="text-sm font-medium">Nome do Grupo</label>
+              <input
+                value={editGroupName}
+                onChange={e => setEditGroupName(e.target.value)}
+                className="w-full mt-1 px-3 py-2 bg-secondary border border-border rounded-lg text-sm outline-none focus:border-primary transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Descrição</label>
+              <textarea
+                value={editGroupDesc}
+                onChange={e => setEditGroupDesc(e.target.value)}
+                className="w-full mt-1 px-3 py-2 bg-secondary border border-border rounded-lg text-sm outline-none focus:border-primary transition-colors resize-none"
+                rows={2}
+              />
+            </div>
+            <button
+              onClick={handleEditGroup}
+              disabled={!editGroupName.trim()}
+              className="w-full py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+            >
+              Salvar Alterações
             </button>
           </div>
         </DialogContent>
