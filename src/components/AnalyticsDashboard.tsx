@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { BarChart3, DollarSign, Zap, Activity, Download, Plus, Check, ChevronDown, CalendarIcon, X, Trash2, Key, Shield, RefreshCw } from 'lucide-react';
+import { BarChart3, DollarSign, Zap, Activity, Download, Plus, Check, ChevronDown, CalendarIcon, X, Trash2, Key, Shield, RefreshCw, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   usageEvents, projectsAPI, filterEventsByPeriod, filterEventsByProjects,
