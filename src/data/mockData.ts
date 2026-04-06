@@ -1,4 +1,4 @@
-import type { User, Organization, Group, Chat, ChatMessage, Assistant, Artifact, ProjectFile, ProjectChat, ProjectAPI, AnalyticsData } from './types';
+import type { User, Organization, Group, Chat, ChatMessage, Assistant, Artifact, ProjectFile, ProjectChat, ProjectAPI, UsageEvent, Endpoint } from './types';
 
 export const currentUser: User = {
   id: 'u1',
@@ -40,68 +40,45 @@ export const chats: Chat[] = [
     createdAt: new Date(2026, 3, 1), updatedAt: new Date(2026, 3, 3),
     messages: makeMessages([
       ['Analise as cláusulas de rescisão do contrato anexo.', 'Com base no contrato fornecido, identifiquei 3 cláusulas de rescisão principais:\n\n**Cláusula 8.1** — Rescisão sem justa causa com aviso prévio de 30 dias e multa de 10%.\n\n**Cláusula 8.2** — Rescisão por justa causa em caso de descumprimento, sem multa.\n\n**Cláusula 8.3** — Rescisão por força maior, com suspensão de obrigações por até 90 dias.\n\nRecomendo revisar a Cláusula 8.1, pois a multa de 10% está abaixo do padrão de mercado (15-20%).'],
-      ['Quais artigos do Código Civil se aplicam?', 'Os artigos relevantes do Código Civil brasileiro são:\n\n- **Art. 473** — Resilição unilateral (rescisão sem justa causa)\n- **Art. 474** — Cláusula resolutiva expressa\n- **Art. 475** — Resolução por inadimplemento\n- **Art. 393** — Caso fortuito e força maior\n\nA cláusula 8.1 do contrato está alinhada com o Art. 473, mas sugiro adicionar referência explícita para fortalecer a posição jurídica.'],
+      ['Quais artigos do Código Civil se aplicam?', 'Os artigos relevantes do Código Civil brasileiro são:\n\n- **Art. 473** — Resilição unilateral\n- **Art. 474** — Cláusula resolutiva expressa\n- **Art. 475** — Resolução por inadimplemento\n- **Art. 393** — Caso fortuito e força maior'],
     ]),
   },
   {
     id: 'c2', title: 'Estratégia de Conteúdo Maio', projectId: 'p2', isPrivate: false, createdBy: 'u1',
     createdAt: new Date(2026, 3, 2), updatedAt: new Date(2026, 3, 4),
     messages: makeMessages([
-      ['Crie um calendário editorial para maio focado em IA generativa.', '## Calendário Editorial — Maio 2026\n\n**Semana 1 (4-8 Mai)**\n- Blog: "5 Formas de Usar IA no Marketing"\n- LinkedIn: Carrossel com estatísticas de adoção de IA\n- Newsletter: Introdução à série sobre IA\n\n**Semana 2 (11-15 Mai)**\n- Blog: "Case Study: Como a TechCorp usa IA"\n- Instagram: Reels com dicas rápidas\n- Webinar: "IA para Não-Técnicos"\n\n**Semana 3 (18-22 Mai)**\n- Blog: "Prompt Engineering para Marketers"\n- LinkedIn: Artigo thought-leadership do CEO\n\n**Semana 4 (25-29 Mai)**\n- Blog: "O Futuro do Marketing com IA"\n- Todas as redes: Compilação do mês'],
+      ['Crie um calendário editorial para maio focado em IA generativa.', '## Calendário Editorial — Maio 2026\n\n**Semana 1**: Blog + LinkedIn\n**Semana 2**: Case Study + Webinar\n**Semana 3**: Prompt Engineering\n**Semana 4**: Compilação'],
     ]),
   },
   {
     id: 'c3', title: 'Refatoração Microserviços', projectId: 'p1', isPrivate: false, createdBy: 'u1',
     createdAt: new Date(2026, 2, 28), updatedAt: new Date(2026, 3, 5),
     messages: makeMessages([
-      ['Sugira uma arquitetura para migrar nosso monolito para microserviços.', '## Proposta de Arquitetura de Microserviços\n\n### Fase 1 — Strangler Fig Pattern\nComece extraindo os bounded contexts mais independentes:\n\n1. **Auth Service** — Autenticação e autorização (JWT + OAuth2)\n2. **User Service** — Gestão de perfis e preferências\n3. **Billing Service** — Faturamento e pagamentos\n\n### Fase 2 — Core Business\n4. **Chat Service** — Gestão de conversas e mensagens\n5. **AI Gateway** — Proxy para modelos de IA com rate limiting\n6. **Analytics Service** — Coleta e processamento de métricas\n\n### Infraestrutura\n- **API Gateway**: Kong ou AWS API Gateway\n- **Message Queue**: RabbitMQ para comunicação assíncrona\n- **Service Mesh**: Istio para observabilidade\n- **Database per Service**: PostgreSQL + Redis por serviço'],
+      ['Sugira uma arquitetura para migrar nosso monolito para microserviços.', '## Proposta\n\n### Fase 1 — Strangler Fig\n1. Auth Service\n2. User Service\n3. Billing Service\n\n### Fase 2 — Core\n4. Chat Service\n5. AI Gateway\n6. Analytics Service'],
     ]),
   },
   {
     id: 'c4', title: 'Brainstorm produto v3', projectId: undefined, isPrivate: false, createdBy: 'u1',
     createdAt: new Date(2026, 3, 4), updatedAt: new Date(2026, 3, 5),
     messages: makeMessages([
-      ['Quais features devemos priorizar para a v3?', 'Com base nas tendências de mercado e feedback de clientes, recomendo priorizar:\n\n🔥 **Alta prioridade**\n1. **Multimodal** — Suporte a imagens e documentos no chat\n2. **Workflows automatizados** — Encadeamento de prompts\n3. **RAG avançado** — Busca semântica em documentos da empresa\n\n⚡ **Média prioridade**\n4. **Templates de assistentes** — Galeria compartilhável\n5. **Integrações nativas** — Slack, Teams, Google Workspace\n\n📊 **Backlog**\n6. **API pública de analytics**\n7. **Previsão de custos com ML**'],
+      ['Quais features devemos priorizar para a v3?', '🔥 Alta: Multimodal, Workflows, RAG avançado\n⚡ Média: Templates, Integrações\n📊 Backlog: API analytics, Previsão de custos'],
     ]),
   },
   {
     id: 'c5', title: 'Rascunho NDA', projectId: 'p3', isPrivate: true, createdBy: 'u1',
     createdAt: new Date(2026, 3, 5), updatedAt: new Date(2026, 3, 5),
     messages: makeMessages([
-      ['Me ajude a rascunhar um NDA bilateral.', 'Aqui está um modelo de NDA bilateral:\n\n---\n\n**ACORDO DE CONFIDENCIALIDADE BILATERAL**\n\nPelo presente instrumento, as Partes abaixo identificadas acordam:\n\n**1. DEFINIÇÃO DE INFORMAÇÃO CONFIDENCIAL**\nConsidera-se confidencial toda informação técnica, comercial, financeira ou estratégica...\n\n**2. OBRIGAÇÕES**\nAs Partes se comprometem a não divulgar, copiar ou utilizar as Informações Confidenciais para fins diversos...\n\n**3. PRAZO**\nEste acordo vigorará por 2 (dois) anos a partir da assinatura...\n\n**4. EXCEÇÕES**\nNão serão consideradas confidenciais informações que sejam de domínio público...'],
+      ['Me ajude a rascunhar um NDA bilateral.', '**ACORDO DE CONFIDENCIALIDADE BILATERAL**\n\n1. Definição de Informação Confidencial\n2. Obrigações\n3. Prazo: 2 anos\n4. Exceções'],
     ]),
   },
 ];
 
 export const projectsChat: ProjectChat[] = [
-  {
-    id: 'p1', name: 'Plataforma v2 — Engenharia', description: 'Desenvolvimento da nova versão da plataforma SoberanIA',
-    orgId: 'org1', ownerId: 'u1', status: 'ativo',
-    systemContext: 'Você é um assistente técnico especializado em arquitetura de software, microserviços e cloud. Sempre sugira boas práticas e padrões de design.',
-    isShared: true, groups: ['g1', 'g4'], createdAt: new Date(2026, 1, 15), updatedAt: new Date(2026, 3, 5),
-  },
-  {
-    id: 'p2', name: 'Marketing Digital Q2', description: 'Campanhas e conteúdo para o segundo trimestre',
-    orgId: 'org1', ownerId: 'u1', status: 'ativo',
-    systemContext: 'Você é um especialista em marketing digital com foco em B2B SaaS. Sempre inclua métricas e KPIs relevantes nas sugestões.',
-    isShared: true, groups: ['g2'], createdAt: new Date(2026, 2, 1), updatedAt: new Date(2026, 3, 4),
-  },
-  {
-    id: 'p3', name: 'Análise Jurídica — Contratos', description: 'Revisão e análise de contratos empresariais',
-    orgId: 'org1', ownerId: 'u1', status: 'ativo',
-    systemContext: 'Você é um assistente jurídico especializado em contratos empresariais brasileiros. Sempre cite artigos do Código Civil quando relevante.',
-    isShared: true, groups: ['g3'], createdAt: new Date(2026, 2, 10), updatedAt: new Date(2026, 3, 5),
-  },
-  {
-    id: 'p4', name: 'Pesquisa Pessoal', description: 'Meu espaço de pesquisa individual',
-    orgId: 'org1', ownerId: 'u1', status: 'ativo', systemContext: '',
-    isShared: false, groups: [], createdAt: new Date(2026, 3, 1), updatedAt: new Date(2026, 3, 5),
-  },
-  {
-    id: 'p5', name: 'Onboarding Novos Clientes', description: 'Projeto arquivado de onboarding',
-    orgId: 'org1', ownerId: 'u1', status: 'arquivado', systemContext: '',
-    isShared: true, groups: ['g4'], createdAt: new Date(2025, 10, 1), updatedAt: new Date(2026, 1, 15),
-  },
+  { id: 'p1', name: 'Plataforma v2 — Engenharia', description: 'Desenvolvimento da nova versão', orgId: 'org1', ownerId: 'u1', status: 'ativo', systemContext: 'Você é um assistente técnico especializado em arquitetura de software.', isShared: true, groups: ['g1', 'g4'], createdAt: new Date(2026, 1, 15), updatedAt: new Date(2026, 3, 5) },
+  { id: 'p2', name: 'Marketing Digital Q2', description: 'Campanhas e conteúdo para o Q2', orgId: 'org1', ownerId: 'u1', status: 'ativo', systemContext: 'Você é um especialista em marketing digital B2B SaaS.', isShared: true, groups: ['g2'], createdAt: new Date(2026, 2, 1), updatedAt: new Date(2026, 3, 4) },
+  { id: 'p3', name: 'Análise Jurídica — Contratos', description: 'Revisão de contratos empresariais', orgId: 'org1', ownerId: 'u1', status: 'ativo', systemContext: 'Você é um assistente jurídico especializado em contratos.', isShared: true, groups: ['g3'], createdAt: new Date(2026, 2, 10), updatedAt: new Date(2026, 3, 5) },
+  { id: 'p4', name: 'Pesquisa Pessoal', description: 'Espaço individual', orgId: 'org1', ownerId: 'u1', status: 'ativo', systemContext: '', isShared: false, groups: [], createdAt: new Date(2026, 3, 1), updatedAt: new Date(2026, 3, 5) },
+  { id: 'p5', name: 'Onboarding Novos Clientes', description: 'Projeto arquivado', orgId: 'org1', ownerId: 'u1', status: 'arquivado', systemContext: '', isShared: true, groups: ['g4'], createdAt: new Date(2025, 10, 1), updatedAt: new Date(2026, 1, 15) },
 ];
 
 export const projectsAPI: ProjectAPI[] = [
@@ -111,11 +88,11 @@ export const projectsAPI: ProjectAPI[] = [
 ];
 
 export const assistants: Assistant[] = [
-  { id: 'a1', name: 'Arquiteto de Software', instructions: 'Foque em arquitetura escalável, microserviços e cloud-native.', projectId: 'p1', createdBy: 'u1', preferredModel: 'SoberanIA-4o', status: 'ativo', icon: '🏗️' },
-  { id: 'a2', name: 'Code Reviewer', instructions: 'Revise código com foco em qualidade, segurança e performance.', projectId: 'p1', createdBy: 'u1', preferredModel: 'SoberanIA-4o', status: 'ativo', icon: '🔍' },
-  { id: 'a3', name: 'Redator de Copy', instructions: 'Escreva textos persuasivos para B2B SaaS.', projectId: 'p2', createdBy: 'u1', status: 'ativo', icon: '✍️' },
-  { id: 'a4', name: 'Analista de Métricas', instructions: 'Interprete dados de campanha e sugira otimizações.', projectId: 'p2', createdBy: 'u1', status: 'ativo', icon: '📊' },
-  { id: 'a5', name: 'Consultor Jurídico', instructions: 'Analise contratos e cite legislação brasileira relevante.', projectId: 'p3', createdBy: 'u1', preferredModel: 'SoberanIA-4o', status: 'ativo', icon: '⚖️' },
+  { id: 'a1', name: 'Arquiteto de Software', instructions: 'Foque em arquitetura escalável.', projectId: 'p1', createdBy: 'u1', preferredModel: 'SoberanIA-4o', status: 'ativo', icon: '🏗️' },
+  { id: 'a2', name: 'Code Reviewer', instructions: 'Revise código com foco em qualidade.', projectId: 'p1', createdBy: 'u1', preferredModel: 'SoberanIA-4o', status: 'ativo', icon: '🔍' },
+  { id: 'a3', name: 'Redator de Copy', instructions: 'Escreva textos persuasivos B2B.', projectId: 'p2', createdBy: 'u1', status: 'ativo', icon: '✍️' },
+  { id: 'a4', name: 'Analista de Métricas', instructions: 'Interprete dados de campanha.', projectId: 'p2', createdBy: 'u1', status: 'ativo', icon: '📊' },
+  { id: 'a5', name: 'Consultor Jurídico', instructions: 'Analise contratos e cite legislação.', projectId: 'p3', createdBy: 'u1', preferredModel: 'SoberanIA-4o', status: 'ativo', icon: '⚖️' },
 ];
 
 export const artifacts: Artifact[] = [
@@ -134,42 +111,239 @@ export const projectFiles: ProjectFile[] = [
   { id: 'f5', name: 'brand-guidelines.pdf', size: 8900000, type: 'application/pdf', projectId: 'p2', uploadedBy: 'u1', uploadedAt: new Date(2026, 2, 15) },
 ];
 
-const generateDailyCosts = () => {
-  const days: { date: string; cost: number }[] = [];
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date(2026, 3, 5);
-    d.setDate(d.getDate() - i);
-    days.push({
-      date: d.toISOString().split('T')[0],
-      cost: Math.round((200 + Math.random() * 400) * 100) / 100,
+// ========== USAGE EVENTS (granular mock data) ==========
+
+const USERS_DATA = [
+  { id: 'u1', name: 'André Silva', email: 'andre@empresa.com', role: 'Admin' },
+  { id: 'u2', name: 'Carlos Mendes', email: 'carlos@empresa.com', role: 'Coordenador' },
+  { id: 'u3', name: 'Ana Costa', email: 'ana@empresa.com', role: 'Coordenador' },
+  { id: 'u4', name: 'Rafael Santos', email: 'rafael@empresa.com', role: 'Membro' },
+  { id: 'u5', name: 'Juliana Pereira', email: 'juliana@empresa.com', role: 'Membro' },
+  { id: 'u6', name: 'Pedro Almeida', email: 'pedro@empresa.com', role: 'Membro' },
+];
+
+const MODELS = ['SoberanIA-4o', 'SoberanIA-4o-mini', 'SoberanIA-3.5', 'SoberanIA-Vision'];
+const ENDPOINTS: Endpoint[] = ['chat', 'file-ingestion', 'web-search'];
+const PROJECTS_API_DATA = projectsAPI;
+
+function seededRandom(seed: number) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+function generateUsageEvents(): UsageEvent[] {
+  const events: UsageEvent[] = [];
+  let id = 0;
+  const baseDate = new Date(2026, 3, 6); // April 6, 2026
+
+  for (let dayOffset = 0; dayOffset < 45; dayOffset++) {
+    const day = new Date(baseDate);
+    day.setDate(day.getDate() - dayOffset);
+
+    const eventsPerDay = 4 + Math.floor(seededRandom(dayOffset * 7) * 6);
+
+    for (let e = 0; e < eventsPerDay; e++) {
+      const seed = dayOffset * 100 + e;
+      const user = USERS_DATA[Math.floor(seededRandom(seed) * USERS_DATA.length)];
+      const project = PROJECTS_API_DATA[Math.floor(seededRandom(seed + 1) * PROJECTS_API_DATA.length)];
+      const model = MODELS[Math.floor(seededRandom(seed + 2) * MODELS.length)];
+      const endpoint = ENDPOINTS[Math.floor(seededRandom(seed + 3) * ENDPOINTS.length)];
+
+      const inputTokens = Math.floor(500 + seededRandom(seed + 4) * 15000);
+      const outputTokens = Math.floor(200 + seededRandom(seed + 5) * 8000);
+
+      const costPerInputToken = model === 'SoberanIA-4o' ? 0.00003 : model === 'SoberanIA-4o-mini' ? 0.000015 : model === 'SoberanIA-Vision' ? 0.00004 : 0.00001;
+      const costPerOutputToken = costPerInputToken * 2;
+      const cost = Math.round((inputTokens * costPerInputToken + outputTokens * costPerOutputToken) * 100) / 100;
+
+      const timestamp = new Date(day);
+      timestamp.setHours(8 + Math.floor(seededRandom(seed + 6) * 12), Math.floor(seededRandom(seed + 7) * 60));
+
+      events.push({
+        id: `evt-${id++}`,
+        userId: user.id,
+        userName: user.name,
+        userEmail: user.email,
+        userRole: user.role,
+        projectId: project.id,
+        projectName: project.name,
+        model,
+        endpoint,
+        inputTokens,
+        outputTokens,
+        cost,
+        timestamp,
+      });
+    }
+  }
+
+  return events;
+}
+
+export const usageEvents: UsageEvent[] = generateUsageEvents();
+
+// ========== AGGREGATION UTILITIES ==========
+
+export function filterEventsByPeriod(events: UsageEvent[], period: 'today' | '7d' | 'month' | 'custom', customRange?: { from: Date; to: Date }): UsageEvent[] {
+  const now = new Date(2026, 3, 6); // Fixed "now" for mock data
+  let start: Date;
+  let end = new Date(now);
+  end.setHours(23, 59, 59, 999);
+
+  switch (period) {
+    case 'today':
+      start = new Date(now);
+      start.setHours(0, 0, 0, 0);
+      break;
+    case '7d':
+      start = new Date(now);
+      start.setDate(start.getDate() - 6);
+      start.setHours(0, 0, 0, 0);
+      break;
+    case 'month':
+      start = new Date(now);
+      start.setDate(start.getDate() - 29);
+      start.setHours(0, 0, 0, 0);
+      break;
+    case 'custom':
+      if (customRange) {
+        start = new Date(customRange.from);
+        start.setHours(0, 0, 0, 0);
+        end = new Date(customRange.to);
+        end.setHours(23, 59, 59, 999);
+      } else {
+        start = new Date(now);
+        start.setDate(start.getDate() - 29);
+        start.setHours(0, 0, 0, 0);
+      }
+      break;
+  }
+
+  return events.filter(e => e.timestamp >= start && e.timestamp <= end);
+}
+
+export function filterEventsByProjects(events: UsageEvent[], projectIds: string[]): UsageEvent[] {
+  if (projectIds.length === 0) return events;
+  return events.filter(e => projectIds.includes(e.projectId));
+}
+
+export function aggregateKPIs(events: UsageEvent[]) {
+  return {
+    totalCost: events.reduce((s, e) => s + e.cost, 0),
+    totalInputTokens: events.reduce((s, e) => s + e.inputTokens, 0),
+    totalOutputTokens: events.reduce((s, e) => s + e.outputTokens, 0),
+    totalRequests: events.length,
+  };
+}
+
+export function aggregateByDay(events: UsageEvent[], metric: 'cost' | 'inputTokens' | 'outputTokens' | 'requests') {
+  const map = new Map<string, number>();
+  for (const e of events) {
+    const key = e.timestamp.toISOString().split('T')[0];
+    const val = metric === 'cost' ? e.cost : metric === 'inputTokens' ? e.inputTokens : metric === 'outputTokens' ? e.outputTokens : 1;
+    map.set(key, (map.get(key) || 0) + val);
+  }
+  return Array.from(map.entries()).map(([date, value]) => ({ date, value })).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+export function aggregateByModel(events: UsageEvent[], metric: 'cost' | 'inputTokens' | 'outputTokens' | 'requests') {
+  const map = new Map<string, { value: number; tokens: number; requests: number; cost: number }>();
+  for (const e of events) {
+    const prev = map.get(e.model) || { value: 0, tokens: 0, requests: 0, cost: 0 };
+    const val = metric === 'cost' ? e.cost : metric === 'inputTokens' ? e.inputTokens : metric === 'outputTokens' ? e.outputTokens : 1;
+    map.set(e.model, {
+      value: prev.value + val,
+      tokens: prev.tokens + e.inputTokens + e.outputTokens,
+      requests: prev.requests + 1,
+      cost: prev.cost + e.cost,
     });
   }
-  return days;
-};
+  const total = Array.from(map.values()).reduce((s, v) => s + v.value, 0);
+  return Array.from(map.entries()).map(([model, d]) => ({
+    model,
+    value: d.value,
+    tokens: d.tokens,
+    requests: d.requests,
+    cost: d.cost,
+    percentage: total > 0 ? Math.round((d.value / total) * 1000) / 10 : 0,
+  }));
+}
 
-export const analyticsData: AnalyticsData = {
+export function aggregateByProject(events: UsageEvent[], metric: 'cost' | 'inputTokens' | 'outputTokens' | 'requests') {
+  const map = new Map<string, { value: number; tokens: number; requests: number; cost: number }>();
+  for (const e of events) {
+    const prev = map.get(e.projectName) || { value: 0, tokens: 0, requests: 0, cost: 0 };
+    const val = metric === 'cost' ? e.cost : metric === 'inputTokens' ? e.inputTokens : metric === 'outputTokens' ? e.outputTokens : 1;
+    map.set(e.projectName, {
+      value: prev.value + val,
+      tokens: prev.tokens + e.inputTokens + e.outputTokens,
+      requests: prev.requests + 1,
+      cost: prev.cost + e.cost,
+    });
+  }
+  const total = Array.from(map.values()).reduce((s, v) => s + v.value, 0);
+  return Array.from(map.entries()).map(([project, d]) => ({
+    project,
+    value: d.value,
+    tokens: d.tokens,
+    requests: d.requests,
+    cost: d.cost,
+    percentage: total > 0 ? Math.round((d.value / total) * 1000) / 10 : 0,
+  }));
+}
+
+export function aggregateByUser(events: UsageEvent[], metric: 'cost' | 'inputTokens' | 'outputTokens' | 'requests') {
+  const map = new Map<string, { name: string; email: string; role: string; value: number; tokens: number; requests: number; cost: number }>();
+  for (const e of events) {
+    const prev = map.get(e.userId) || { name: e.userName, email: e.userEmail, role: e.userRole, value: 0, tokens: 0, requests: 0, cost: 0 };
+    const val = metric === 'cost' ? e.cost : metric === 'inputTokens' ? e.inputTokens : metric === 'outputTokens' ? e.outputTokens : 1;
+    map.set(e.userId, {
+      ...prev,
+      value: prev.value + val,
+      tokens: prev.tokens + e.inputTokens + e.outputTokens,
+      requests: prev.requests + 1,
+      cost: prev.cost + e.cost,
+    });
+  }
+  return Array.from(map.values()).map(u => ({
+    ...u,
+    avgCostPerRequest: u.requests > 0 ? Math.round((u.cost / u.requests) * 1000) / 1000 : 0,
+  }));
+}
+
+export function aggregateByEndpoint(events: UsageEvent[], metric: 'cost' | 'inputTokens' | 'outputTokens' | 'requests') {
+  const map = new Map<string, { value: number; tokens: number; requests: number; cost: number }>();
+  for (const e of events) {
+    const prev = map.get(e.endpoint) || { value: 0, tokens: 0, requests: 0, cost: 0 };
+    const val = metric === 'cost' ? e.cost : metric === 'inputTokens' ? e.inputTokens : metric === 'outputTokens' ? e.outputTokens : 1;
+    map.set(e.endpoint, {
+      value: prev.value + val,
+      tokens: prev.tokens + e.inputTokens + e.outputTokens,
+      requests: prev.requests + 1,
+      cost: prev.cost + e.cost,
+    });
+  }
+  const total = Array.from(map.values()).reduce((s, v) => s + v.value, 0);
+  const labelMap: Record<string, string> = { 'chat': 'Chat', 'file-ingestion': 'Ingestão de Arquivos', 'web-search': 'Busca na Web' };
+  return Array.from(map.entries()).map(([endpoint, d]) => ({
+    endpoint,
+    label: labelMap[endpoint] || endpoint,
+    value: d.value,
+    tokens: d.tokens,
+    requests: d.requests,
+    cost: d.cost,
+    percentage: total > 0 ? Math.round((d.value / total) * 1000) / 10 : 0,
+  }));
+}
+
+// Keep backward compat for analyticsData (used nowhere else now but just in case)
+export const analyticsData = {
   totalCost: 12450.80,
   totalInputTokens: 45200000,
   totalOutputTokens: 28700000,
   totalRequests: 156420,
-  costByDay: generateDailyCosts(),
-  costByModel: [
-    { model: 'SoberanIA-4o', cost: 7200, tokens: 42000000, requests: 85000, percentage: 57.8 },
-    { model: 'SoberanIA-4o-mini', cost: 2800, tokens: 18000000, requests: 45000, percentage: 22.5 },
-    { model: 'SoberanIA-3.5', cost: 1650, tokens: 9500000, requests: 20000, percentage: 13.3 },
-    { model: 'SoberanIA-Vision', cost: 800, tokens: 4400000, requests: 6420, percentage: 6.4 },
-  ],
-  costByProject: [
-    { project: 'Produção — Chat API', cost: 5420.30, tokens: 32000000, requests: 89000, percentage: 43.5 },
-    { project: 'Staging — Testes', cost: 1230.50, tokens: 8500000, requests: 32000, percentage: 9.9 },
-    { project: 'Marketing Bot', cost: 890.00, tokens: 5200000, requests: 15420, percentage: 7.1 },
-  ],
-  costByUser: [
-    { user: 'André Silva', email: 'andre@empresa.com', role: 'Admin', cost: 3200, tokens: 18000000, requests: 42000, avgCostPerRequest: 0.076 },
-    { user: 'Carlos Mendes', email: 'carlos@empresa.com', role: 'Coordenador', cost: 2800, tokens: 15000000, requests: 38000, avgCostPerRequest: 0.074 },
-    { user: 'Ana Costa', email: 'ana@empresa.com', role: 'Coordenador', cost: 1950, tokens: 11000000, requests: 28000, avgCostPerRequest: 0.070 },
-    { user: 'Rafael Santos', email: 'rafael@empresa.com', role: 'Membro', cost: 1500, tokens: 8500000, requests: 22000, avgCostPerRequest: 0.068 },
-    { user: 'Juliana Pereira', email: 'juliana@empresa.com', role: 'Membro', cost: 1200, tokens: 7000000, requests: 18000, avgCostPerRequest: 0.067 },
-    { user: 'Pedro Almeida', email: 'pedro@empresa.com', role: 'Membro', cost: 890, tokens: 5200000, requests: 14000, avgCostPerRequest: 0.064 },
-  ],
+  costByDay: [] as { date: string; cost: number }[],
+  costByModel: [] as any[],
+  costByProject: [] as any[],
+  costByUser: [] as any[],
 };
