@@ -450,6 +450,41 @@ export function SettingsView({ onNavigate }: SettingsViewProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Group Dialog */}
+      <Dialog open={editGroupOpen} onOpenChange={setEditGroupOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Grupo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <label className="text-sm font-medium">Nome do Grupo</label>
+              <input
+                value={editGroupName}
+                onChange={e => setEditGroupName(e.target.value)}
+                className="w-full mt-1 px-3 py-2 bg-secondary border border-border rounded-lg text-sm outline-none focus:border-primary transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Descrição</label>
+              <textarea
+                value={editGroupDesc}
+                onChange={e => setEditGroupDesc(e.target.value)}
+                className="w-full mt-1 px-3 py-2 bg-secondary border border-border rounded-lg text-sm outline-none focus:border-primary transition-colors resize-none"
+                rows={2}
+              />
+            </div>
+            <button
+              onClick={handleEditGroup}
+              disabled={!editGroupName.trim()}
+              className="w-full py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+            >
+              Salvar Alterações
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
