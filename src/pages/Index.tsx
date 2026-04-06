@@ -97,7 +97,7 @@ const Index = () => {
           <ProjectDetailView projectId={activeProjectId} onBack={() => setView('projects')} onOpenChat={handleSelectChat} />
         )}
         {view === 'analytics' && <AnalyticsDashboard onNavigate={(v) => setView(v as AppView)} />}
-        {view === 'settings' && <SettingsView />}
+        {view === 'settings' && <SettingsView onNavigate={(v) => setView(v as AppView)} />}
       </main>
     </div>
   );
