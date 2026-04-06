@@ -224,6 +224,13 @@ export function SettingsView({ onNavigate }: SettingsViewProps) {
                         <p className="text-sm font-medium">{g.name}</p>
                         <p className="text-xs text-muted-foreground">{g.description}</p>
                       </div>
+                      <button
+                        onClick={(e) => openEditGroup(g, e)}
+                        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors ml-1"
+                        title="Editar grupo"
+                      >
+                        <Pencil size={14} />
+                      </button>
                     </div>
                     <div className="text-right">
                       <p className="text-sm">{allMemberIds.length} membros</p>
