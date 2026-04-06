@@ -112,15 +112,13 @@ export function SettingsView({ onNavigate }: SettingsViewProps) {
       projectsLinked: 0,
     };
     setGroups(prev => [...prev, newGroup]);
-    // Initialize member roles for this group
     const newRoles: Record<string, UserRole> = {};
-    newGroupMembers.forEach(uid => { newRoles[uid] = 'membro'; });
+    newGroupMembers.forEach(m => { newRoles[m.userId] = m.role; });
     setMemberRoles(prev => ({ ...prev, [newGroup.id]: newRoles }));
-    // Update member group assignments
     setMemberGroupAssignments(prev => {
       const updated = { ...prev };
-      newGroupMembers.forEach(uid => {
-        updated[uid] = [...(updated[uid] || []), newGroup.id];
+      newGroupMembers.forEach(m => {
+        updated[m.userId] = [...(updated[m.userId] || []), newGroup.id];
       });
       return updated;
     });
@@ -129,6 +127,21 @@ export function SettingsView({ onNavigate }: SettingsViewProps) {
     setNewGroupMembers([]);
     setNewGroupSearch('');
     setNewGroupOpen(false);
+  };
+
+  const handleEditGroup = () => {
+    if (!editGroupId || !editGroupName.trim()) return;
+    setGroups(prev => prev.map(g => g.id === editGroupId ? { ...g, name: editGroupName.trim(), description: editGroupDesc.trim() || undefined } : g));
+    setEditGroupOpen(false);
+    setEditGroupId(null);
+  };
+
+  const openEditGroup = (g: Group, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditGroupId(g.id);
+    setEditGroupName(g.name);
+    setEditGroupDesc(g.description || '');
+    setEditGroupOpen(true);
   };
 
   const filteredNewGroupUsers = allUsers.filter(u =>
