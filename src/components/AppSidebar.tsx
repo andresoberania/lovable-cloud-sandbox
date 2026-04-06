@@ -1,4 +1,4 @@
-import { MessageSquare, FolderOpen, BarChart3, Settings, Plus, ChevronLeft, Search } from 'lucide-react';
+import { MessageSquare, FolderOpen, BarChart3, Building2, Plus, ChevronLeft, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Chat } from '@/data/types';
 import type { AppView } from '@/pages/Index';
@@ -25,7 +25,7 @@ export function AppSidebar({
   const navItems = [
     { id: 'projects' as AppView, label: 'Projetos', icon: FolderOpen },
     { id: 'analytics' as AppView, label: 'Analytics API', icon: BarChart3 },
-    { id: 'settings' as AppView, label: 'Configurações', icon: Settings },
+    { id: 'settings' as AppView, label: 'Organização', icon: Building2 },
   ];
 
   return (

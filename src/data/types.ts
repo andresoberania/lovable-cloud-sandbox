@@ -46,6 +46,7 @@ export interface Chat {
   updatedAt: Date;
   messages: ChatMessage[];
   assistantId?: string;
+  visibility?: 'private' | 'shared';
 }
 
 export interface Assistant {
@@ -109,9 +110,11 @@ export interface ProjectAPI {
 
 export interface APIKey {
   id: string;
-  key: string;
+  maskedKey: string;
   userId: string;
+  userName: string;
   projectId: string;
+  projectName: string;
   status: 'ativa' | 'revogada';
   createdAt: Date;
 }
@@ -132,6 +135,16 @@ export interface UsageEvent {
   outputTokens: number;
   cost: number;
   timestamp: Date;
+}
+
+export interface GroupMember {
+  userId: string;
+  role: UserRole;
+}
+
+export interface ProjectAPIMember {
+  userId: string;
+  role: UserRole;
 }
 
 export interface AnalyticsData {

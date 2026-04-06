@@ -83,7 +83,7 @@ const Index = () => {
             {view === 'projects' && 'Projetos'}
             {view === 'project-detail' && 'Detalhes do Projeto'}
             {view === 'analytics' && 'Analytics — API'}
-            {view === 'settings' && 'Configurações'}
+            {view === 'settings' && 'Organização'}
           </span>
         </header>
 
@@ -96,7 +96,7 @@ const Index = () => {
         {view === 'project-detail' && (
           <ProjectDetailView projectId={activeProjectId} onBack={() => setView('projects')} onOpenChat={handleSelectChat} />
         )}
-        {view === 'analytics' && <AnalyticsDashboard />}
+        {view === 'analytics' && <AnalyticsDashboard onNavigate={(v) => setView(v as AppView)} />}
         {view === 'settings' && <SettingsView />}
       </main>
     </div>
