@@ -22,6 +22,11 @@ export function ProjectDetailView({ projectId, onBack, onOpenChat }: ProjectDeta
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const project = projectsChat.find(p => p.id === projectId);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [inlineMessages.length]);
+
   if (!project) return null;
 
   const projectChats = projectChatsState.filter(c => c.projectId === projectId);
@@ -30,10 +35,6 @@ export function ProjectDetailView({ projectId, onBack, onOpenChat }: ProjectDeta
   const projectFilesData = projectFiles.filter(f => f.projectId === projectId);
   const projectGroups = groups.filter(g => project.groups.includes(g.id));
   const otherProjects = projectsChat.filter(p => p.id !== projectId && p.status === 'ativo');
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [inlineMessages.length]);
 
   const handleSendInline = () => {
     if (!chatInput.trim()) return;
