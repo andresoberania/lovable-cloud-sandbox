@@ -401,23 +401,40 @@ export function SettingsView({ onNavigate }: SettingsViewProps) {
                   placeholder="Buscar membro..."
                 />
               </div>
-              <div className="max-h-40 overflow-y-auto space-y-1 border border-border rounded-lg p-2">
-                {filteredNewGroupUsers.map(u => (
-                  <button
-                    key={u.id}
-                    onClick={() => setNewGroupMembers(prev => prev.includes(u.id) ? prev.filter(id => id !== u.id) : [...prev, u.id])}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-secondary transition-colors"
-                  >
-                    <Checkbox checked={newGroupMembers.includes(u.id)} className="pointer-events-none" />
-                    <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-medium text-primary">
-                      {u.name.split(' ').map(n => n[0]).join('')}
+              <div className="max-h-48 overflow-y-auto space-y-1 border border-border rounded-lg p-2">
+                {filteredNewGroupUsers.map(u => {
+                  const isSelected = newGroupMembers.some(m => m.userId === u.id);
+                  const memberEntry = newGroupMembers.find(m => m.userId === u.id);
+                  return (
+                    <div key={u.id} className="flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-secondary transition-colors">
+                      <button
+                        onClick={() => setNewGroupMembers(prev => isSelected ? prev.filter(m => m.userId !== u.id) : [...prev, { userId: u.id, role: 'membro' as UserRole }])}
+                        className="flex items-center gap-2 flex-1 min-w-0"
+                      >
+                        <Checkbox checked={isSelected} className="pointer-events-none" />
+                        <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-medium text-primary shrink-0">
+                          {u.name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <div className="text-left truncate">
+                          <span className="block">{u.name}</span>
+                          <span className="text-muted-foreground">{u.email}</span>
+                        </div>
+                      </button>
+                      {isSelected && (
+                        <select
+                          value={memberEntry?.role || 'membro'}
+                          onChange={(e) => setNewGroupMembers(prev => prev.map(m => m.userId === u.id ? { ...m, role: e.target.value as UserRole } : m))}
+                          className="bg-secondary border border-border rounded px-1.5 py-1 text-[10px] outline-none focus:border-primary shrink-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <option value="admin">Admin</option>
+                          <option value="coordenador">Coordenador</option>
+                          <option value="membro">Membro</option>
+                        </select>
+                      )}
                     </div>
-                    <div className="text-left">
-                      <span className="block">{u.name}</span>
-                      <span className="text-muted-foreground">{u.email}</span>
-                    </div>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
               {newGroupMembers.length > 0 && (
                 <p className="text-xs text-muted-foreground mt-1">{newGroupMembers.length} membro(s) selecionado(s)</p>
