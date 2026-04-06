@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Building2, Users, FolderOpen, Shield, ChevronDown, ChevronRight, MoreHorizontal, Check, Plus, Search } from 'lucide-react';
+import { Building2, Users, FolderOpen, Shield, ChevronDown, ChevronRight, MoreHorizontal, Check, Plus, Search, Pencil } from 'lucide-react';
 import { organization, groups as initialGroups, currentUser, projectsAPI, allUsers, groupMembers, projectAPIMembers, projectsChat } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
