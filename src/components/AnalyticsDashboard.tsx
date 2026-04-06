@@ -39,6 +39,8 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
+  const [newProjectMembers, setNewProjectMembers] = useState<string[]>([]);
+  const [newProjectMemberSearch, setNewProjectMemberSearch] = useState('');
   const [deletedProjects, setDeletedProjects] = useState<Set<string>>(new Set());
 
   // Detailed analysis filters
