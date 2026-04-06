@@ -53,8 +53,14 @@ export function SettingsView({ onNavigate }: SettingsViewProps) {
   const [newGroupOpen, setNewGroupOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupDesc, setNewGroupDesc] = useState('');
-  const [newGroupMembers, setNewGroupMembers] = useState<string[]>([]);
+  const [newGroupMembers, setNewGroupMembers] = useState<{ userId: string; role: UserRole }[]>([]);
   const [newGroupSearch, setNewGroupSearch] = useState('');
+
+  // Edit Group Dialog
+  const [editGroupOpen, setEditGroupOpen] = useState(false);
+  const [editGroupId, setEditGroupId] = useState<string | null>(null);
+  const [editGroupName, setEditGroupName] = useState('');
+  const [editGroupDesc, setEditGroupDesc] = useState('');
 
   const toggleGroup = (id: string) => {
     setExpandedGroups(prev => {
