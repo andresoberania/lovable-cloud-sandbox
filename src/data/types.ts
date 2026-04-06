@@ -116,12 +116,18 @@ export interface APIKey {
   createdAt: Date;
 }
 
+export type Endpoint = 'chat' | 'file-ingestion' | 'web-search';
+
 export interface UsageEvent {
   id: string;
   userId: string;
+  userName: string;
+  userEmail: string;
+  userRole: string;
   projectId: string;
+  projectName: string;
   model: string;
-  endpoint: string;
+  endpoint: Endpoint;
   inputTokens: number;
   outputTokens: number;
   cost: number;
