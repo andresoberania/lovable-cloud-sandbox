@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import {
   usageEvents, projectsAPI, filterEventsByPeriod, filterEventsByProjects,
   aggregateKPIs, aggregateByDay, aggregateByModel, aggregateByProject,
-  aggregateByUser, aggregateByEndpoint, apiKeys as mockApiKeys, currentUser,
+  aggregateByUser, aggregateByEndpoint, apiKeys as mockApiKeys, currentUser, allUsers,
 } from '@/data/mockData';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
