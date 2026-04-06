@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
-import { BarChart3, DollarSign, Zap, Activity, Download, Plus, Check, ChevronDown, CalendarIcon, X, Trash2, Key, Shield, RefreshCw } from 'lucide-react';
+import { BarChart3, DollarSign, Zap, Activity, Download, Plus, Check, ChevronDown, CalendarIcon, X, Trash2, Key, Shield, RefreshCw, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   usageEvents, projectsAPI, filterEventsByPeriod, filterEventsByProjects,
   aggregateKPIs, aggregateByDay, aggregateByModel, aggregateByProject,
-  aggregateByUser, aggregateByEndpoint, apiKeys as mockApiKeys, currentUser,
+  aggregateByUser, aggregateByEndpoint, apiKeys as mockApiKeys, currentUser, allUsers,
 } from '@/data/mockData';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -39,6 +39,8 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
+  const [newProjectMembers, setNewProjectMembers] = useState<string[]>([]);
+  const [newProjectMemberSearch, setNewProjectMemberSearch] = useState('');
   const [deletedProjects, setDeletedProjects] = useState<Set<string>>(new Set());
 
   // Detailed analysis filters
@@ -152,13 +154,46 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
                   <div className="space-y-4 mt-2">
                     <div>
                       <label className="text-sm font-medium">Nome</label>
-                      <input value={newProjectName} onChange={e => setNewProjectName(e.target.value)} className="w-full mt-1 px-3 py-2 bg-secondary border border-border rounded-lg text-sm" placeholder="Ex: Produção — API v2" />
+                      <input value={newProjectName} onChange={e => setNewProjectName(e.target.value)} className="w-full mt-1 px-3 py-2 bg-secondary border border-border rounded-lg text-sm outline-none focus:border-primary" placeholder="Ex: Produção — API v2" />
                     </div>
                     <div>
                       <label className="text-sm font-medium">Descrição</label>
-                      <textarea value={newProjectDesc} onChange={e => setNewProjectDesc(e.target.value)} className="w-full mt-1 px-3 py-2 bg-secondary border border-border rounded-lg text-sm" rows={3} placeholder="Descreva o projeto..." />
+                      <textarea value={newProjectDesc} onChange={e => setNewProjectDesc(e.target.value)} className="w-full mt-1 px-3 py-2 bg-secondary border border-border rounded-lg text-sm outline-none focus:border-primary resize-none" rows={3} placeholder="Descreva o projeto..." />
                     </div>
-                    <button onClick={() => setNewProjectOpen(false)} className="w-full py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90">
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Membros com Acesso</label>
+                      <div className="relative mb-2">
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <input
+                          value={newProjectMemberSearch}
+                          onChange={e => setNewProjectMemberSearch(e.target.value)}
+                          className="w-full pl-9 pr-3 py-2 bg-secondary border border-border rounded-lg text-sm outline-none focus:border-primary"
+                          placeholder="Buscar membro..."
+                        />
+                      </div>
+                      <div className="max-h-40 overflow-y-auto space-y-1 border border-border rounded-lg p-2">
+                        {allUsers.filter(u => !newProjectMemberSearch || u.name.toLowerCase().includes(newProjectMemberSearch.toLowerCase()) || u.email.toLowerCase().includes(newProjectMemberSearch.toLowerCase())).map(u => (
+                          <button
+                            key={u.id}
+                            onClick={() => setNewProjectMembers(prev => prev.includes(u.id) ? prev.filter(id => id !== u.id) : [...prev, u.id])}
+                            className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-secondary transition-colors"
+                          >
+                            <Checkbox checked={newProjectMembers.includes(u.id)} className="pointer-events-none" />
+                            <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-medium text-primary">
+                              {u.name.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <div className="text-left">
+                              <span className="block">{u.name}</span>
+                              <span className="text-muted-foreground">{u.email}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      {newProjectMembers.length > 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">{newProjectMembers.length} membro(s) selecionado(s)</p>
+                      )}
+                    </div>
+                    <button onClick={() => { setNewProjectOpen(false); setNewProjectMembers([]); setNewProjectMemberSearch(''); }} className="w-full py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90">
                       Criar Projeto
                     </button>
                   </div>
